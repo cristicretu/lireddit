@@ -11,6 +11,7 @@ import { UserResolver } from "./resolvers/user";
 import redis from "redis";
 import session from "express-session";
 import connectRedis from "connect-redis";
+// import cors from "cors";
 // import { MyContext } from "./types";
 
 const main = async () => {
@@ -18,6 +19,13 @@ const main = async () => {
   await orm.getMigrator().up();
 
   const app = express();
+
+  // app.use(
+  //   cors({
+  //     origin: "https://studio.apollographql.com",
+  //     credentials: true,
+  //   })
+  // );
 
   const RedisStore = connectRedis(session);
   const redisClient = redis.createClient();
