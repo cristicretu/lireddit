@@ -12,9 +12,6 @@ type InputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   name: string;
 };
 
-// '' => false
-// 'error message stuff' => true
-
 export const InputField: React.FC<InputFieldProps> = ({
   label,
   size: _,
