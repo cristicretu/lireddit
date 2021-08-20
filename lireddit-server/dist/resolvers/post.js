@@ -18,7 +18,6 @@ const Post_1 = require("../entities/Post");
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 let PostResolver = class PostResolver {
     async posts({ em }) {
-        await sleep(3000);
         return em.find(Post_1.Post, {});
     }
     post(id, { em }) {
