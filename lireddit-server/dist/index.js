@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const core_1 = require("@mikro-orm/core");
+const constants_1 = require("./constants");
 const mikro_orm_config_1 = __importDefault(require("./mikro-orm.config"));
 const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
@@ -37,9 +38,10 @@ const main = async () => {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
             httpOnly: true,
             sameSite: "lax",
+            secure: constants_1.__prod__,
         },
         saveUninitialized: false,
-        secret: "qowiueojwojfalksdjoqiwueo",
+        secret: "iwdaowidhawoudhuyergiuer",
         resave: false,
     }));
     const apolloServer = new apollo_server_express_1.ApolloServer({
@@ -53,10 +55,7 @@ const main = async () => {
     await apolloServer.start();
     apolloServer.applyMiddleware({
         app,
-        cors: {
-            origin: "http://localhost:3000",
-            credentials: true,
-        },
+        cors: false,
     });
     app.listen(4000, () => {
         console.log("server started on localhost:4000");

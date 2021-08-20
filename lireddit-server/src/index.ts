@@ -29,7 +29,6 @@ const main = async () => {
       credentials: true,
     })
   );
-
   app.use(
     session({
       name: "qid",
@@ -41,10 +40,10 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
         sameSite: "lax", // csrf
-        // secure: __prod__, // cookie only works in https
+        secure: __prod__, // cookie only works in https
       },
       saveUninitialized: false,
-      secret: "qowiueojwojfalksdjoqiwueo",
+      secret: "iwdaowidhawoudhuyergiuer",
       resave: false,
     })
   );
@@ -62,10 +61,7 @@ const main = async () => {
 
   apolloServer.applyMiddleware({
     app,
-    cors: {
-      origin: "http://localhost:3000",
-      credentials: true,
-    },
+    cors: false,
   });
 
   app.listen(4000, () => {
