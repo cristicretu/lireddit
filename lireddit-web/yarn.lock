@@ -1210,17 +1210,6 @@
     auto-bind "~4.0.0"
     tslib "~2.3.0"
 
-"@graphql-codegen/typescript-react-apollo@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript-react-apollo/-/typescript-react-apollo-3.0.0.tgz#8ec6e65a1a6cf177418b38c681d1376f81095093"
-  integrity sha512-acg2GArcdHYusLragNCqrDjLLbE3M2I9cUuckIoo8KiDtB3/PzQ9eCg3WRjgPYA5zaFpLaFS6QQlRJhD/j0Wgw==
-  dependencies:
-    "@graphql-codegen/plugin-helpers" "^2.0.0"
-    "@graphql-codegen/visitor-plugin-common" "2.0.0"
-    auto-bind "~4.0.0"
-    change-case-all "1.0.14"
-    tslib "~2.3.0"
-
 "@graphql-codegen/typescript-urql@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript-urql/-/typescript-urql-3.1.0.tgz#e1456cb9078fb7862357af256d3a3d888aaf1de5"
@@ -1750,12 +1739,20 @@
   dependencies:
     "@types/node" "*"
 
-"@urql/core@^2.1.4":
+"@urql/core@>=2.3.0", "@urql/core@^2.1.4":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@urql/core/-/core-2.3.0.tgz#3bc34e46e0ac9646a5bfcfad2c93872a1d20106b"
   integrity sha512-pBw3LxqoYroXlLb+jvWrLyNpGl2WRvga9ZSco99aG/o/pMKb5ugfDVPPGPE7UCh7IGI4rb/2xPEmkiWdrtYbkg==
   dependencies:
     "@graphql-typed-document-node/core" "^3.1.0"
+    wonka "^4.0.14"
+
+"@urql/exchange-graphcache@^4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@urql/exchange-graphcache/-/exchange-graphcache-4.3.0.tgz#741493a409e059b796de6d483d5be9e2c0089294"
+  integrity sha512-r2jiBOS6yFYck0X/mPOnxa7Yvi+wH84O18kUAaCxxes238Miztz4DSf4ICXg5xlxWBuxKJelLibZT4spfRR3Xw==
+  dependencies:
+    "@urql/core" ">=2.3.0"
     wonka "^4.0.14"
 
 abort-controller@3.0.0:
