@@ -77,6 +77,17 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
+        const userVerify = await em.findOne(User_1.User, { username: options.username });
+        if (userVerify) {
+            return {
+                errors: [
+                    {
+                        field: "username",
+                        message: "username already exists",
+                    },
+                ],
+            };
+        }
         if (options.password.length <= 2) {
             return {
                 errors: [
@@ -92,23 +103,11 @@ let UserResolver = class UserResolver {
             username: options.username,
             password: hashedPassword,
         });
-        try {
-            await em.persistAndFlush(user);
-        }
-        catch (err) {
-            if (err.code === "23505") {
-                return {
-                    errors: [
-                        {
-                            field: "username",
-                            message: "username already taken",
-                        },
-                    ],
-                };
-            }
-        }
+        await em.persistAndFlush(user);
         req.session.userId = user.id;
-        return { user };
+        return {
+            user,
+        };
     }
     async login(options, { em, req }) {
         const user = await em.findOne(User_1.User, { username: options.username });

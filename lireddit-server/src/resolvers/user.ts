@@ -66,6 +66,18 @@ export class UserResolver {
       };
     }
 
+    const userVerify = await em.findOne(User, { username: options.username });
+    if (userVerify) {
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "username already exists",
+          },
+        ],
+      };
+    }
+
     if (options.password.length <= 2) {
       return {
         errors: [
@@ -82,29 +94,13 @@ export class UserResolver {
       username: options.username,
       password: hashedPassword,
     });
-    try {
-      await em.persistAndFlush(user);
-    } catch (err) {
-      //|| err.detail.includes("already exists")) {
-      // duplicate username error
-      if (err.code === "23505") {
-        return {
-          errors: [
-            {
-              field: "username",
-              message: "username already taken",
-            },
-          ],
-        };
-      }
-    }
+    await em.persistAndFlush(user);
 
-    // store user id session
-    // this will set a cookie on the user
-    // keep them logged in
     req.session.userId = user.id;
 
-    return { user };
+    return {
+      user,
+    };
   }
 
   @Mutation(() => UserResponse)
