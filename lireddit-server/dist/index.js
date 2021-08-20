@@ -29,7 +29,7 @@ const main = async () => {
         credentials: true,
     }));
     app.use(express_session_1.default({
-        name: "qid",
+        name: constants_1.COOKIE_NAME,
         store: new RedisStore({
             client: redisClient,
             disableTouch: true,
