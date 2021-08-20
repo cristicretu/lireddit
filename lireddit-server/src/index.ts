@@ -12,7 +12,7 @@ import redis from "redis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
-// import { MyContext } from "./types";
+import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
@@ -41,7 +41,7 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
         sameSite: "lax", // csrf
-        secure: __prod__, // cookie only works in https
+        // secure: __prod__, // cookie only works in https
       },
       saveUninitialized: false,
       secret: "qowiueojwojfalksdjoqiwueo",
@@ -55,6 +55,7 @@ const main = async () => {
       validate: false,
     }),
     context: ({ req, res }) => ({ em: orm.em, req, res }),
+    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
   });
 
   await apolloServer.start();
@@ -62,7 +63,7 @@ const main = async () => {
   apolloServer.applyMiddleware({
     app,
     cors: {
-      origin: "studio.graphql.com",
+      origin: "http://localhost:3000",
       credentials: true,
     },
   });

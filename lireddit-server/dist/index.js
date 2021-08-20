@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const core_1 = require("@mikro-orm/core");
-const constants_1 = require("./constants");
 const mikro_orm_config_1 = __importDefault(require("./mikro-orm.config"));
 const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
@@ -17,6 +16,7 @@ const redis_1 = __importDefault(require("redis"));
 const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
 const cors_1 = __importDefault(require("cors"));
+const apollo_server_core_1 = require("apollo-server-core");
 const main = async () => {
     const orm = await core_1.MikroORM.init(mikro_orm_config_1.default);
     await orm.getMigrator().up();
@@ -37,7 +37,6 @@ const main = async () => {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
             httpOnly: true,
             sameSite: "lax",
-            secure: constants_1.__prod__,
         },
         saveUninitialized: false,
         secret: "qowiueojwojfalksdjoqiwueo",
@@ -49,12 +48,13 @@ const main = async () => {
             validate: false,
         }),
         context: ({ req, res }) => ({ em: orm.em, req, res }),
+        plugins: [apollo_server_core_1.ApolloServerPluginLandingPageGraphQLPlayground()],
     });
     await apolloServer.start();
     apolloServer.applyMiddleware({
         app,
         cors: {
-            origin: "studio.graphql.com",
+            origin: "http://localhost:3000",
             credentials: true,
         },
     });
