@@ -431,6 +431,13 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.9.tgz#b97c057e6138adb7b720df2bd0264b03c9f504fd"
   integrity sha512-CMjgRNsks27IDwI785YMY0KLt3co/c0cQ5foxHYv/shC2w8oOnVwz5Ubq1QG5KzrcW+AXk6gzdnxIkDnTvzu3g==
 
+"@types/nodemailer@^6.4.4":
+  version "6.4.4"
+  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-6.4.4.tgz#c265f7e7a51df587597b3a49a023acaf0c741f4b"
+  integrity sha512-Ksw4t7iliXeYGvIQcSIgWQ5BLuC/mljIEbjf615svhZL10PE9t+ei8O9gDaD3FPCasUJn9KTLwz2JFJyiiyuqw==
+  dependencies:
+    "@types/node" "*"
+
 "@types/qs@*":
   version "6.9.7"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.7.tgz#63bb7d067db107cc1e457c303bc25d511febf6cb"
@@ -3960,6 +3967,11 @@ node-fingerprint@0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/node-fingerprint/-/node-fingerprint-0.0.2.tgz#31cbabeb71a67ae7dd5a7dc042e51c3c75868501"
   integrity sha1-Mcur63GmeufdWn3AQuUcPHWGhQE=
+
+nodemailer@^6.6.3:
+  version "6.6.3"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.6.3.tgz#31fb53dd4d8ae16fc088a65cb9ffa8d928a69b48"
+  integrity sha512-faZFufgTMrphYoDjvyVpbpJcYzwyFnbAMmQtj1lVBYAUSm3SOy2fIdd9+Mr4UxPosBa0JRw9bJoIwQn+nswiew==
 
 nodemon@^2.0.12:
   version "2.0.12"

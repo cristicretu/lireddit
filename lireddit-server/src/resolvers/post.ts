@@ -2,7 +2,7 @@ import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
 import { Post } from "../entities/Post";
 import { MyContext } from "src/types";
 
-const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+// const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 @Resolver()
 export class PostResolver {
