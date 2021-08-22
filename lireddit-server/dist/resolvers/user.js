@@ -51,9 +51,10 @@ UserResponse = __decorate([
     type_graphql_1.ObjectType()
 ], UserResponse);
 let UserResolver = class UserResolver {
-    async changePassword(token, newPassword, { redis, em }) {
+    async changePassword(token, newPassword, { redis, em, req }) {
         if (newPassword.length <= 2) {
-            return { errors: [
+            return {
+                errors: [
                     {
                         field: "newPassword",
                         message: "length must be greater than 2",
@@ -61,27 +62,36 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
-        const userId = redis.get(constants_1.FORGET_PASSWORD_PREFIX + token);
+        const key = constants_1.FORGET_PASSWORD_PREFIX + token;
+        const userId = await redis.get(key);
+        console.log(userId);
         if (!userId) {
             return {
                 errors: [
-                    { field: "token", message: "token expiorred" }
+                    {
+                        field: "token",
+                        message: "token expired",
+                    },
                 ],
             };
         }
-        const user = await em.findOne(User_1.User, { id: parseInt(userId) });
+        const userIdNum = parseInt(userId);
+        const user = await em.findOne(User_1.User, { id: userIdNum });
         if (!user) {
             return {
                 errors: [
-                    { field: "token", message: "user no longer exists" }
+                    {
+                        field: "token",
+                        message: "user no longer exists",
+                    },
                 ],
             };
         }
         user.password = await argon2_1.default.hash(newPassword);
-        em.persistAndFlush(user);
-        return {
-            user,
-        };
+        await em.persistAndFlush(user);
+        await redis.del(key);
+        req.session.userId = user.id;
+        return { user };
     }
     async forgotPassword(email, { em, redis }) {
         const user = await em.findOne(User_1.User, { email });
