@@ -7,7 +7,8 @@ import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, Link } from "@chakra-ui/react";
+import NextLink from "next/link";
 
 const Login: React.FC<{}> = ({}) => {
   const router = useRouter();
@@ -40,6 +41,11 @@ const Login: React.FC<{}> = ({}) => {
                 label="Password"
                 type="password"
               />
+            </Box>
+            <Box>
+              <NextLink href="/forgot-password">
+                <Link>Forgot password </Link>
+              </NextLink>
             </Box>
             <Button
               mt={4}
