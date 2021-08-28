@@ -8,10 +8,12 @@ import { InputField } from "../components/InputField";
 import { Layout } from "../components/Layout";
 import { useCreatePostMutation } from "../generated/graphql";
 import { createUrqlClient } from "../utils/createUrqlClient";
+import { useIsAuth } from "../utils/useIsAuth";
 
 const CreatePost: React.FC<{}> = ({}) => {
-  const router = useRouter();
   const [, createPost] = useCreatePostMutation();
+  const router = useRouter();
+  useIsAuth();
   return (
     <Layout variant="small">
       <Formik
