@@ -18,13 +18,16 @@ import { User } from "./entities/User";
 const main = async () => {
   const conn = createConnection({
     type: "postgres",
-    database: "lireddit2",
+    database: "lireddit3",
     username: "postgres",
     password: "postgres",
     logging: true,
     synchronize: true,
     entities: [Post, User],
   });
+
+  // await Post.delete({});
+  // await User.delete({});
 
   const app = express();
 

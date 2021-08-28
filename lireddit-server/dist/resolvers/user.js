@@ -94,7 +94,7 @@ let UserResolver = class UserResolver {
         return { user };
     }
     async forgotPassword(email, { redis }) {
-        const user = await User_1.User.findOne({ where: email });
+        const user = await User_1.User.findOne({ where: { email } });
         if (!user) {
             return true;
         }
