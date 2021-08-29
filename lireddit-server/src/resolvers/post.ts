@@ -1,19 +1,20 @@
-import { isAuth } from "../middleware/isAuth";
 import { MyContext } from "src/types";
 import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   InputType,
   Int,
   Mutation,
   Query,
   Resolver,
+  Root,
   UseMiddleware,
 } from "type-graphql";
-import { Post } from "../entities/Post";
-import { LargeNumberLike } from "crypto";
 import { getConnection } from "typeorm";
+import { Post } from "../entities/Post";
+import { isAuth } from "../middleware/isAuth";
 
 // const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -25,11 +26,15 @@ class PostInput {
   text: string;
 }
 
-@Resolver()
+@Resolver(Post)
 export class PostResolver {
+  @FieldResolver(() => String)
+  textSnippet(@Root() root: Post) {
+    return root.text.slice(0, 50);
+  }
   @Query(() => [Post])
   async posts(
-    @Arg("limit") limit: number,
+    @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string
   ): Promise<Post[]> {
     const realLimit = Math.min(50, limit);
