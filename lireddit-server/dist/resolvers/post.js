@@ -14,9 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostResolver = void 0;
 const type_graphql_1 = require("type-graphql");
-const typeorm_1 = require("typeorm");
 const Post_1 = require("../entities/Post");
 const isAuth_1 = require("../middleware/isAuth");
+const typeorm_1 = require("typeorm");
 let PostInput = class PostInput {
 };
 __decorate([
@@ -31,8 +31,8 @@ PostInput = __decorate([
     type_graphql_1.InputType()
 ], PostInput);
 let PostResolver = class PostResolver {
-    textSnippet(root) {
-        return root.text.slice(0, 50);
+    textSnippet(post) {
+        return post.text.slice(0, 50);
     }
     async posts(limit, cursor) {
         const realLimit = Math.min(50, limit);
@@ -42,7 +42,9 @@ let PostResolver = class PostResolver {
             .orderBy('"createdAt"', "DESC")
             .take(realLimit);
         if (cursor) {
-            qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+            qb.where('"createdAt" < :cursor', {
+                cursor: new Date(parseInt(cursor)),
+            });
         }
         return qb.getMany();
     }
@@ -58,7 +60,7 @@ let PostResolver = class PostResolver {
             return null;
         }
         if (typeof title !== "undefined") {
-            Post_1.Post.update({ id }, { title });
+            await Post_1.Post.update({ id }, { title });
         }
         return post;
     }
@@ -79,12 +81,12 @@ __decorate([
     __param(0, type_graphql_1.Arg("limit", () => type_graphql_1.Int)),
     __param(1, type_graphql_1.Arg("cursor", () => String, { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String]),
+    __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "posts", null);
 __decorate([
     type_graphql_1.Query(() => Post_1.Post, { nullable: true }),
-    __param(0, type_graphql_1.Arg("id", () => type_graphql_1.Int)),
+    __param(0, type_graphql_1.Arg("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)

@@ -1,22 +1,20 @@
-import { MyContext } from "src/types";
 import {
-  Arg,
-  Ctx,
-  Field,
-  FieldResolver,
-  InputType,
-  Int,
-  Mutation,
-  Query,
   Resolver,
-  Root,
+  Query,
+  Arg,
+  Mutation,
+  InputType,
+  Field,
+  Ctx,
   UseMiddleware,
+  Int,
+  FieldResolver,
+  Root,
 } from "type-graphql";
-import { getConnection } from "typeorm";
 import { Post } from "../entities/Post";
+import { MyContext } from "../types";
 import { isAuth } from "../middleware/isAuth";
-
-// const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+import { getConnection } from "typeorm";
 
 @InputType()
 class PostInput {
@@ -29,13 +27,14 @@ class PostInput {
 @Resolver(Post)
 export class PostResolver {
   @FieldResolver(() => String)
-  textSnippet(@Root() root: Post) {
-    return root.text.slice(0, 50);
+  textSnippet(@Root() post: Post) {
+    return post.text.slice(0, 50);
   }
+
   @Query(() => [Post])
   async posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => String, { nullable: true }) cursor: string
+    @Arg("cursor", () => String, { nullable: true }) cursor: string | null
   ): Promise<Post[]> {
     const realLimit = Math.min(50, limit);
     const qb = getConnection()
@@ -43,14 +42,18 @@ export class PostResolver {
       .createQueryBuilder("p")
       .orderBy('"createdAt"', "DESC")
       .take(realLimit);
+
     if (cursor) {
-      qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+      qb.where('"createdAt" < :cursor', {
+        cursor: new Date(parseInt(cursor)),
+      });
     }
+
     return qb.getMany();
   }
 
   @Query(() => Post, { nullable: true })
-  post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
+  post(@Arg("id") id: number): Promise<Post | undefined> {
     return Post.findOne(id);
   }
 
@@ -60,7 +63,10 @@ export class PostResolver {
     @Arg("input") input: PostInput,
     @Ctx() { req }: MyContext
   ): Promise<Post> {
-    return Post.create({ ...input, creatorId: req.session.userId }).save();
+    return Post.create({
+      ...input,
+      creatorId: req.session.userId,
+    }).save();
   }
 
   @Mutation(() => Post, { nullable: true })
@@ -73,7 +79,7 @@ export class PostResolver {
       return null;
     }
     if (typeof title !== "undefined") {
-      Post.update({ id }, { title });
+      await Post.update({ id }, { title });
     }
     return post;
   }
