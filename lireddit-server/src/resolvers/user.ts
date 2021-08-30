@@ -40,10 +40,11 @@ class UserResponse {
 export class UserResolver {
   @FieldResolver(() => String)
   email(@Root() user: User, @Ctx() { req }: MyContext) {
+    // this is the current user and its ok to show them their own email
     if (req.session.userId === user.id) {
       return user.email;
     }
-
+    // current user wants to see someone elses email
     return "";
   }
 
@@ -66,8 +67,6 @@ export class UserResolver {
 
     const key = FORGET_PASSWORD_PREFIX + token;
     const userId = await redis.get(key);
-    console.log(userId);
-
     if (!userId) {
       return {
         errors: [
@@ -95,7 +94,9 @@ export class UserResolver {
 
     await User.update(
       { id: userIdNum },
-      { password: await argon2.hash(newPassword) }
+      {
+        password: await argon2.hash(newPassword),
+      }
     );
 
     await redis.del(key);
@@ -112,8 +113,8 @@ export class UserResolver {
     @Ctx() { redis }: MyContext
   ) {
     const user = await User.findOne({ where: { email } });
-
     if (!user) {
+      // the email is not in the db
       return true;
     }
 
@@ -123,13 +124,14 @@ export class UserResolver {
       FORGET_PASSWORD_PREFIX + token,
       user.id,
       "ex",
-      1000 * 60 * 30
-    );
+      1000 * 60 * 60 * 24 * 3
+    ); // 3 days
 
     await sendEmail(
       email,
       `<a href="http://localhost:3000/change-password/${token}">reset password</a>`
     );
+
     return true;
   }
 
@@ -153,53 +155,43 @@ export class UserResolver {
       return { errors };
     }
 
-    const userVerify = await User.findOne({
-      where: { username: options.username },
-    });
-    if (userVerify) {
-      return {
-        errors: [
-          {
-            field: "username",
-            message: "username already exists",
-          },
-        ],
-      };
-    }
-
-    const userVerify2 = await User.findOne({
-      where: { email: options.email },
-    });
-    if (userVerify2) {
-      return {
-        errors: [
-          {
-            field: "email",
-            message: "email already exists",
-          },
-        ],
-      };
-    }
-
     const hashedPassword = await argon2.hash(options.password);
-    const result = await getConnection()
-      .createQueryBuilder()
-      .insert()
-      .into(User)
-      .values({
-        username: options.username,
-        email: options.email,
-        password: hashedPassword,
-      })
-      .returning("*")
-      .execute();
-    const user = result.raw[0];
+    let user;
+    try {
+      // User.create({}).save()
+      const result = await getConnection()
+        .createQueryBuilder()
+        .insert()
+        .into(User)
+        .values({
+          username: options.username,
+          email: options.email,
+          password: hashedPassword,
+        })
+        .returning("*")
+        .execute();
+      user = result.raw[0];
+    } catch (err) {
+      //|| err.detail.includes("already exists")) {
+      // duplicate username error
+      if (err.code === "23505") {
+        return {
+          errors: [
+            {
+              field: "username",
+              message: "username already taken",
+            },
+          ],
+        };
+      }
+    }
 
+    // store user id session
+    // this will set a cookie on the user
+    // keep them logged in
     req.session.userId = user.id;
 
-    return {
-      user,
-    };
+    return { user };
   }
 
   @Mutation(() => UserResponse)

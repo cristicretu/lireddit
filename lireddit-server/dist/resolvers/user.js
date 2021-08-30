@@ -71,7 +71,6 @@ let UserResolver = class UserResolver {
         }
         const key = constants_1.FORGET_PASSWORD_PREFIX + token;
         const userId = await redis.get(key);
-        console.log(userId);
         if (!userId) {
             return {
                 errors: [
@@ -94,7 +93,9 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
-        await User_1.User.update({ id: userIdNum }, { password: await argon2_1.default.hash(newPassword) });
+        await User_1.User.update({ id: userIdNum }, {
+            password: await argon2_1.default.hash(newPassword),
+        });
         await redis.del(key);
         req.session.userId = user.id;
         return { user };
@@ -105,7 +106,7 @@ let UserResolver = class UserResolver {
             return true;
         }
         const token = uuid_1.v4();
-        await redis.set(constants_1.FORGET_PASSWORD_PREFIX + token, user.id, "ex", 1000 * 60 * 30);
+        await redis.set(constants_1.FORGET_PASSWORD_PREFIX + token, user.id, "ex", 1000 * 60 * 60 * 24 * 3);
         await sendEmail_1.sendEmail(email, `<a href="http://localhost:3000/change-password/${token}">reset password</a>`);
         return true;
     }
@@ -120,49 +121,36 @@ let UserResolver = class UserResolver {
         if (errors) {
             return { errors };
         }
-        const userVerify = await User_1.User.findOne({
-            where: { username: options.username },
-        });
-        if (userVerify) {
-            return {
-                errors: [
-                    {
-                        field: "username",
-                        message: "username already exists",
-                    },
-                ],
-            };
-        }
-        const userVerify2 = await User_1.User.findOne({
-            where: { email: options.email },
-        });
-        if (userVerify2) {
-            return {
-                errors: [
-                    {
-                        field: "email",
-                        message: "email already exists",
-                    },
-                ],
-            };
-        }
         const hashedPassword = await argon2_1.default.hash(options.password);
-        const result = await typeorm_1.getConnection()
-            .createQueryBuilder()
-            .insert()
-            .into(User_1.User)
-            .values({
-            username: options.username,
-            email: options.email,
-            password: hashedPassword,
-        })
-            .returning("*")
-            .execute();
-        const user = result.raw[0];
+        let user;
+        try {
+            const result = await typeorm_1.getConnection()
+                .createQueryBuilder()
+                .insert()
+                .into(User_1.User)
+                .values({
+                username: options.username,
+                email: options.email,
+                password: hashedPassword,
+            })
+                .returning("*")
+                .execute();
+            user = result.raw[0];
+        }
+        catch (err) {
+            if (err.code === "23505") {
+                return {
+                    errors: [
+                        {
+                            field: "username",
+                            message: "username already taken",
+                        },
+                    ],
+                };
+            }
+        }
         req.session.userId = user.id;
-        return {
-            user,
-        };
+        return { user };
     }
     async login(usernameOrEmail, password, { req }) {
         const user = await User_1.User.findOne(usernameOrEmail.includes("@")
