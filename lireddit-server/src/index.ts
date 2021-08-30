@@ -28,7 +28,7 @@ const main = async () => {
     entities: [Post, User],
   });
   (await conn).runMigrations();
-
+  //hahahaha
   // await Post.delete({});
   // await User.delete({});
 

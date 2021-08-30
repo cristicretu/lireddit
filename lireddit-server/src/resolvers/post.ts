@@ -10,6 +10,7 @@ import {
   Int,
   FieldResolver,
   Root,
+  ObjectType,
 } from "type-graphql";
 import { Post } from "../entities/Post";
 import { MyContext } from "../types";
@@ -24,6 +25,14 @@ class PostInput {
   text: string;
 }
 
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[];
+  @Field()
+  hasMore: boolean;
+}
+
 @Resolver(Post)
 export class PostResolver {
   @FieldResolver(() => String)
@@ -31,12 +40,12 @@ export class PostResolver {
     return post.text.slice(0, 50);
   }
 
-  @Query(() => [Post])
+  @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null
-  ): Promise<Post[]> {
-    const realLimit = Math.min(50, limit);
+  ): Promise<PaginatedPosts> {
+    const realLimit = Math.min(50, limit) + 1;
     const qb = getConnection()
       .getRepository(Post)
       .createQueryBuilder("p")
@@ -49,12 +58,34 @@ export class PostResolver {
       });
     }
 
-    return qb.getMany();
+    const posts = await qb.getMany();
+
+    return {
+      posts: posts.slice(0, realLimit - 1),
+      hasMore: posts.length === realLimit,
+    };
   }
 
   @Query(() => Post, { nullable: true })
   post(@Arg("id") id: number): Promise<Post | undefined> {
     return Post.findOne(id);
+    // const post = await getConnection().query(
+    //   `
+    //   select p.*,
+    //   json_build_object(
+    //     '_id', u._id,
+    //     'username', u.username,
+    //     'email', u.email,
+    //     'createdAt', u."createdAt",
+    //     'updatedAt', u."updatedAt"
+    //     ) creator
+    //   from post p
+    //   inner join public.user u on u._id = p."creatorId"
+    //   where p._id = $1
+    // `,
+    //   [id]
+    // );
+    // return post;
   }
 
   @Mutation(() => Post)
