@@ -11,8 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Updoot = void 0;
 const typeorm_1 = require("typeorm");
-const User_1 = require("./User");
 const Post_1 = require("./Post");
+const User_1 = require("./User");
 let Updoot = class Updoot extends typeorm_1.BaseEntity {
 };
 __decorate([
