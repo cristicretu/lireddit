@@ -16,6 +16,7 @@ exports.PostResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const typeorm_1 = require("typeorm");
 const Post_1 = require("../entities/Post");
+const Updoot_1 = require("../entities/Updoot");
 const isAuth_1 = require("../middleware/isAuth");
 let PostInput = class PostInput {
 };
@@ -49,20 +50,38 @@ let PostResolver = class PostResolver {
     }
     async vote(postId, value, { req }) {
         const isUpdoot = value !== -1;
+        console.log(isUpdoot);
         const realValue = isUpdoot ? 1 : -1;
+        console.log(realValue);
         const { userId } = req.session;
-        await typeorm_1.getConnection().query(`
-    START TRANSACTION;
-
+        const updoot = await Updoot_1.Updoot.findOne({ where: { postId, userId } });
+        if (updoot && updoot.value !== realValue) {
+            await typeorm_1.getConnection().transaction(async (tm) => {
+                await tm.query(`
+    update updoot
+    set value = $1
+    where "postId" = $2 and "userId" = $3
+        `, [realValue, postId, userId]);
+                await tm.query(`
+          update post
+          set points = points + $1
+          where id = $2
+        `, [2 * realValue, postId]);
+            });
+        }
+        else if (!updoot) {
+            await typeorm_1.getConnection().transaction(async (tm) => {
+                await tm.query(`
     insert into updoot ("userId", "postId", value)
-    values (${userId},${postId},${realValue});
-
+    values ($1, $2, $3)
+        `, [userId, postId, realValue]);
+                await tm.query(`
     update post
-    set points = points + ${realValue}
-    where id = ${postId};
-
-    COMMIT;
-    `);
+    set points = points + $1
+    where id = $2
+      `, [realValue, postId]);
+            });
+        }
         return true;
     }
     async posts(limit, cursor) {

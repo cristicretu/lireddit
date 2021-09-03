@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { Flex, Heading, Link, Stack, Box, Text } from "@chakra-ui/layout";
 import { Button, IconButton } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { UpdootSection } from "../components/UpdootSection";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -37,7 +38,7 @@ const Index = () => {
         <Stack spacing={8}>
           {data!.posts.posts.map((p) => (
             <Flex key={p.id} p={5} shadow="md" borderWidth="1px">
-              <Flex direction="column" align="center">
+              {/* <Flex direction="column" align="center">
                 <IconButton
                   colorScheme="orange"
                   aria-label="Upvote Post"
@@ -51,7 +52,8 @@ const Index = () => {
                   size="xs"
                   icon={<ChevronDownIcon />}
                 />
-              </Flex>
+              </Flex> */}
+              <UpdootSection post={p} />
               <Box pl="8px">
                 <Heading fontSize="xl">{p.title}</Heading>{" "}
                 <Text>posted by {p.creator.username}</Text>
