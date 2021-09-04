@@ -12,10 +12,11 @@ import {
   MeDocument,
   MeQuery,
   RegisterMutation,
+  VoteMutationVariables,
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import Router from "next/router";
-import { FieldsOnCorrectTypeRule } from "graphql";
+import gql from "graphql-tag";
 
 const errorExchange: Exchange =
   ({ forward }) =>
@@ -42,14 +43,14 @@ const cursorPagination = (): Resolver => {
 
     const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
     const isItInTheCache = cache.resolve(
-      cache.resolve(entityKey, fieldKey) as string,
+      cache.resolveFieldByKey(entityKey, fieldKey) as string,
       "posts"
     );
     info.partial = !isItInTheCache;
-    const results: string[] = [];
     let hasMore = true;
+    const results: string[] = [];
     fieldInfos.forEach((fi) => {
-      const key = cache.resolve(entityKey, fi.fieldKey) as string;
+      const key = cache.resolveFieldByKey(entityKey, fi.fieldKey) as string;
       const data = cache.resolve(key, "posts") as string[];
       const _hasMore = cache.resolve(key, "hasMore");
       if (!_hasMore) {
@@ -63,6 +64,58 @@ const cursorPagination = (): Resolver => {
       hasMore,
       posts: results,
     };
+
+    // const visited = new Set();
+    // let result: NullArray<string> = [];
+    // let prevOffset: number | null = null;
+
+    // for (let i = 0; i < size; i++) {
+    //   const { fieldKey, arguments: args } = fieldInfos[i];
+    //   if (args === null || !compareArgs(fieldArgs, args)) {
+    //     continue;
+    //   }
+
+    //   const links = cache.resolveFieldByKey(entityKey, fieldKey) as string[];
+    //   const currentOffset = args[cursorArgument];
+
+    //   if (
+    //     links === null ||
+    //     links.length === 0 ||
+    //     typeof currentOffset !== "number"
+    //   ) {
+    //     continue;
+    //   }
+
+    //   if (!prevOffset || currentOffset > prevOffset) {
+    //     for (let j = 0; j < links.length; j++) {
+    //       const link = links[j];
+    //       if (visited.has(link)) continue;
+    //       result.push(link);
+    //       visited.add(link);
+    //     }
+    //   } else {
+    //     const tempResult: NullArray<string> = [];
+    //     for (let j = 0; j < links.length; j++) {
+    //       const link = links[j];
+    //       if (visited.has(link)) continue;
+    //       tempResult.push(link);
+    //       visited.add(link);
+    //     }
+    //     result = [...tempResult, ...result];
+    //   }
+
+    //   prevOffset = currentOffset;
+    // }
+
+    // const hasCurrentPage = cache.resolve(entityKey, fieldName, fieldArgs);
+    // if (hasCurrentPage) {
+    //   return result;
+    // } else if (!(info as any).store.schema) {
+    //   return undefined;
+    // } else {
+    //   info.partial = true;
+    //   return result;
+    // }
   };
 };
 
@@ -84,6 +137,36 @@ export const createUrqlClient = (ssrExchange: any) => ({
       },
       updates: {
         Mutation: {
+          vote: (_result, args, cache, info) => {
+            const { postId, value } = args as VoteMutationVariables;
+            const data = cache.readFragment(
+              gql`
+                fragment _ on Post {
+                  id
+                  points
+                  voteStatus
+                }
+              `,
+              { id: postId } as any
+            );
+
+            if (data) {
+              if (data.voteStatus === value) {
+                return;
+              }
+              const newPoints =
+                (data.points as number) + (!data.voteStatus ? 1 : 2) * value;
+              cache.writeFragment(
+                gql`
+                  fragment __ on Post {
+                    points
+                    voteStatus
+                  }
+                `,
+                { id: postId, points: newPoints, voteStatus: value } as any
+              );
+            }
+          },
           createPost: (_result, args, cache, info) => {
             const allFields = cache.inspectFields("Query");
             const fieldInfos = allFields.filter(

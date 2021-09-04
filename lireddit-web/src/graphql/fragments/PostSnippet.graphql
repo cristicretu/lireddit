@@ -5,6 +5,7 @@ fragment PostSnippet on Post {
   creatorId
   createdAt
   textSnippet
+  voteStatus
   creator {
     id
     username

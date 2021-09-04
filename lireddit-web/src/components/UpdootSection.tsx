@@ -1,11 +1,7 @@
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-import { Flex, IconButton, Text } from "@chakra-ui/react";
+import { Flex, IconButton } from "@chakra-ui/react";
 import React, { useState } from "react";
-import {
-  PostSnippetFragment,
-  useVoteMutation,
-  VoteMutationVariables,
-} from "../generated/graphql";
+import { PostSnippetFragment, useVoteMutation } from "../generated/graphql";
 
 interface UpdootSectionProps {
   post: PostSnippetFragment;
@@ -15,12 +11,14 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
   const [loadingState, setLoadingState] = useState<
     "updoot-loading" | "downdoot-loading" | "not-loading"
   >("not-loading");
-  const [_, vote] = useVoteMutation();
+  const [, vote] = useVoteMutation();
   return (
-    <Flex direction="column" align="center">
+    <Flex direction="column" justifyContent="center" alignItems="center" mr={4}>
       <IconButton
-        colorScheme="orange"
         onClick={async () => {
+          if (post.voteStatus === 1) {
+            return;
+          }
           setLoadingState("updoot-loading");
           await vote({
             postId: post.id,
@@ -28,15 +26,17 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
           });
           setLoadingState("not-loading");
         }}
-        aria-label="Upvote Post"
-        size="xs"
+        colorScheme={post.voteStatus === 1 ? "green" : undefined}
         isLoading={loadingState === "updoot-loading"}
+        aria-label="updoot post"
         icon={<ChevronUpIcon />}
       />
-      <Text> {post.points}</Text>
+      {post.points}
       <IconButton
-        colorScheme="orange"
         onClick={async () => {
+          if (post.voteStatus === -1) {
+            return;
+          }
           setLoadingState("downdoot-loading");
           await vote({
             postId: post.id,
@@ -44,9 +44,9 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
           });
           setLoadingState("not-loading");
         }}
-        aria-label="Downvote Post"
-        size="xs"
+        colorScheme={post.voteStatus === -1 ? "red" : undefined}
         isLoading={loadingState === "downdoot-loading"}
+        aria-label="downdoot post"
         icon={<ChevronDownIcon />}
       />
     </Flex>

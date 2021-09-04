@@ -8,6 +8,7 @@ import { Flex, Heading, Link, Stack, Box, Text } from "@chakra-ui/layout";
 import { Button, IconButton } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { UpdootSection } from "../components/UpdootSection";
+import { NoFragmentCyclesRule } from "graphql";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -84,4 +85,4 @@ const Index = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(Index);
+export default withUrqlClient(createUrqlClient, { ssr: false })(Index);
