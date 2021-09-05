@@ -85,9 +85,14 @@ let PostResolver = class PostResolver {
     async posts(limit, cursor, { req }) {
         const realLimit = Math.min(50, limit);
         const reaLimitPlusOne = realLimit + 1;
-        const replacements = [reaLimitPlusOne, req.session.userId];
+        const replacements = [reaLimitPlusOne];
+        if (req.session.userId) {
+            replacements.push(req.session.userId);
+        }
+        let cursorIndex = 3;
         if (cursor) {
             replacements.push(new Date(parseInt(cursor)));
+            cursorIndex = replacements.length;
         }
         const posts = await typeorm_1.getConnection().query(`
     select p.*,
@@ -103,7 +108,7 @@ let PostResolver = class PostResolver {
             : 'null as "voteStatus"'}
     from post p
     inner join public.user u on u.id = p."creatorId"
-    ${cursor ? `where p."createdAt" < $3` : ""}
+    ${cursor ? `where p."createdAt" < $${cursorIndex}` : ""}
     order by p."createdAt" DESC
     limit $1
     `, replacements);
