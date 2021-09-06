@@ -39,24 +39,13 @@ const Index = () => {
         <Stack spacing={8}>
           {data!.posts.posts.map((p) => (
             <Flex key={p.id} p={5} shadow="md" borderWidth="1px">
-              {/* <Flex direction="column" align="center">
-                <IconButton
-                  colorScheme="orange"
-                  aria-label="Upvote Post"
-                  size="xs"
-                  icon={<ChevronUpIcon />}
-                />
-                <Text> {p.points}</Text>
-                <IconButton
-                  colorScheme="orange"
-                  aria-label="Downvote Post"
-                  size="xs"
-                  icon={<ChevronDownIcon />}
-                />
-              </Flex> */}
               <UpdootSection post={p} />
               <Box pl="8px">
-                <Heading fontSize="xl">{p.title}</Heading>{" "}
+                <NextLink href="post/[id]" as={`post/${p.id}`}>
+                  <Link>
+                    <Heading fontSize="xl">{p.title}</Heading>{" "}
+                  </Link>
+                </NextLink>
                 <Text>posted by {p.creator.username}</Text>
                 <Text mt={4}>{p.textSnippet}</Text>
               </Box>
