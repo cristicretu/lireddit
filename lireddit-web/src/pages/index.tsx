@@ -1,20 +1,31 @@
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
-import { usePostsQuery } from "../generated/graphql";
+import {
+  useDeletePostMutation,
+  useMeQuery,
+  usePostsQuery,
+} from "../generated/graphql";
 import { Layout } from "../components/Layout";
 import NextLink from "next/link";
 import React, { useState } from "react";
 import { Flex, Heading, Link, Stack, Box, Text } from "@chakra-ui/layout";
 import { Button, IconButton } from "@chakra-ui/react";
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { UpdootSection } from "../components/UpdootSection";
 import { NoFragmentCyclesRule } from "graphql";
+import { isServer } from "../utils/isServer";
+import { DeletePostButton } from "../components/DeletePostButton";
 
 const Index = () => {
   const [variables, setVariables] = useState({
     limit: 15,
     cursor: null as null | string,
   });
+
+  // const [{ data }] = useMeQuery({
+  //   pause: isServer(),
+  // });
+
+  // const [, deletePost] = useDeletePostMutation();
 
   const [{ data, fetching }] = usePostsQuery({
     variables,
@@ -26,31 +37,40 @@ const Index = () => {
 
   return (
     <Layout>
-      <Flex align="center">
-        <Heading>LiReddit</Heading>
-        <NextLink href="/create-post">
-          <Link ml="auto">create post</Link>
-        </NextLink>
-      </Flex>
-      <br />
       {!data && fetching ? (
         <div>loading...</div>
       ) : (
         <Stack spacing={8}>
-          {data!.posts.posts.map((p) => (
-            <Flex key={p.id} p={5} shadow="md" borderWidth="1px">
-              <UpdootSection post={p} />
-              <Box pl="8px">
-                <NextLink href="post/[id]" as={`post/${p.id}`}>
-                  <Link>
-                    <Heading fontSize="xl">{p.title}</Heading>{" "}
-                  </Link>
-                </NextLink>
-                <Text>posted by {p.creator.username}</Text>
-                <Text mt={4}>{p.textSnippet}</Text>
-              </Box>
-            </Flex>
-          ))}
+          {data!.posts.posts.map((p) =>
+            !p ? null : (
+              <Flex key={p.id} p={5} shadow="md" borderWidth="1px">
+                <UpdootSection post={p} />
+                <Box pl="8px" flex={1}>
+                  <NextLink href="post/[id]" as={`post/${p.id}`}>
+                    <Link>
+                      <Heading fontSize="xl">{p.title}</Heading>{" "}
+                    </Link>
+                  </NextLink>
+                  <Text>posted by {p.creator.username}</Text>
+                  <Flex align="center">
+                    <Text flex={1} mt={4}>
+                      {p.textSnippet}
+                    </Text>
+                    {/* <IconButton
+                    ml="auto"
+                    onClick={() => {
+                      // deletePost({ id: p.id });
+                    }}
+                    aria-label="delete post"
+                    icon={<DeleteIcon />}
+                    colorScheme="red"
+                  /> */}
+                    <DeletePostButton post={p} />
+                  </Flex>
+                </Box>
+              </Flex>
+            )
+          )}
         </Stack>
       )}
       {data && data.posts.hasMore ? (
