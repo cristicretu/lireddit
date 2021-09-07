@@ -1308,6 +1308,11 @@ cuid@^1.3.8:
     core-js "^1.1.1"
     node-fingerprint "0.0.2"
 
+dataloader@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/dataloader/-/dataloader-2.0.0.tgz#41eaf123db115987e21ca93c005cd7753c55fe6f"
+  integrity sha512-YzhyDAwA4TaQIhM5go+vCLmU0UikghC/t9DTQYZR2M/UvZ1MdOhPezSDZcjj9uqQJOMqjLcpWtyW2iNINdlatQ==
+
 deasync@^0.1.9:
   version "0.1.22"
   resolved "https://registry.yarnpkg.com/deasync/-/deasync-0.1.22.tgz#eed0636ad8a600acc78e8d0e2f038db5e7f0c55c"
