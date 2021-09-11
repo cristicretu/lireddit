@@ -1,10 +1,10 @@
 import {
-  Stack,
-  Flex,
   Box,
-  Link,
-  Heading,
   Button,
+  Flex,
+  Heading,
+  Link,
+  Stack,
   Text,
 } from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
