@@ -7,9 +7,9 @@ import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import Redis from "ioredis";
+// import Redis from "ioredis";
 import session from "express-session";
-import connectRedis from "connect-redis";
+// import connectRedis from "connect-redis";
 import cors from "cors";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { createConnection } from "typeorm";
@@ -33,23 +33,23 @@ const main = async () => {
 
   const app = express();
 
-  const RedisStore = connectRedis(session);
-  const redis = new Redis(process.env.REDIS_URL);
-  app.set("proxy", 1);
+  // const RedisStore = connectRedis(session);
+  // const redis = new Redis(process.env.REDIS_URL);
+  // app.set("proxy", 1);
 
   app.use(
     cors({
-      origin: process.env.CORS_ORIGIN,
+      origin: "http://localhost:3000",
       credentials: true,
     })
   );
   app.use(
     session({
       name: COOKIE_NAME,
-      store: new RedisStore({
-        client: redis,
-        disableTouch: true,
-      }),
+      // store: new RedisStore({
+      //   client: redis,
+      //   disableTouch: true,
+      // }),
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
@@ -58,7 +58,7 @@ const main = async () => {
         domain: __prod__ ? ".cretu.dev" : undefined,
       },
       saveUninitialized: false,
-      secret: process.env.SESSION_SECRET,
+      secret: process.env.SESSION_SECRET || "secret",
       resave: false,
     })
   );
@@ -71,7 +71,7 @@ const main = async () => {
     context: ({ req, res }) => ({
       req,
       res,
-      redis,
+      // redis,
       userLoader: createUserLoader(),
       updootLoader: createUpdootLoader(),
     }),
@@ -85,8 +85,8 @@ const main = async () => {
     cors: false,
   });
 
-  app.listen(parseInt(process.env.PORT), () => {
-    console.log(`server started on localhost:${process.env.PORT}`);
+  app.listen(process.env.PORT || 4000, () => {
+    console.log(`server started on localhost:${process.env.PORT || 8000}`);
   });
 };
 

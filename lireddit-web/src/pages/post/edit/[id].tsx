@@ -69,4 +69,4 @@ export const EditPost: React.FC = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(EditPost);
+export default withUrqlClient(createUrqlClient, { ssr: false })(EditPost);
